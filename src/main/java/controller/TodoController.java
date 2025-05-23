@@ -6,7 +6,8 @@ import service.UserService;
 import utility.InputValidator;
 import entity.Todo;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
@@ -122,23 +123,52 @@ public class TodoController {
         String desc = sc.nextLine();
         System.out.print("Priority (HIGH/MEDIUM/LOW): ");
         String priority = sc.nextLine();
-        System.out.print("Due Date (YYYY-MM-DD): ");
+        System.out.print("Due Date and Time (YYYY-MM-DD HH:mm): ");
         String dueDateStr = sc.nextLine();
-
-        if (!InputValidator.validateDate(dueDateStr)) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime dueDate = LocalDateTime.parse(dueDateStr, formatter);
+        if (!InputValidator.validateDateTime(dueDateStr)) {
             System.out.println("Invalid date format.");
             return;
         }
+        if (!InputValidator.isValidTitle(title)) {
+            System.out.println("Invalid title format.");
+            return;
 
-        TodoDTO dto = new TodoDTO(title, desc, priority, LocalDate.parse(dueDateStr));
+        }
+        if (!InputValidator.validateDescription(desc)) {
+            System.out.println("Invalid description format.");
+            return;
+        }
+
+        if (!InputValidator.isDueDateAfterCreation(LocalDateTime.now(), dueDate)) {
+            System.out.println("Due date/time cannot be before creation date/time.");
+            return;
+        }
+
+        TodoDTO dto = new TodoDTO(title, desc, priority, dueDate);
         todoService.createTodo(userService.getLoggedInUser().getUserId(), dto);
         System.out.println("TODO added!");
     }
 
     private void viewTodos() {
-        List<Todo> todos = todoService.getTodos(userService.getLoggedInUser().getUserId());
-        if (todos.isEmpty()) System.out.println("No TODOs found.");
-        else todos.forEach(System.out::println);
+        System.out.println("Enter search keyword (optional):");
+        String keyword = sc.nextLine();
+
+        System.out.println("Filter by status (Pending/Completed) or leave blank:");
+        String status = sc.nextLine();
+
+        System.out.println("Filter by priority (High/Medium/Low) or leave blank:");
+        String priority = sc.nextLine();
+
+        System.out.println("Sort by (creationDate/dueDate/priority):");
+        String sortBy = sc.nextLine();
+        List<Todo> todos = todoService.getTodos(userService.getLoggedInUser().getUserId(), keyword, status, priority,
+                sortBy);
+        if (todos.isEmpty())
+            System.out.println("No TODOs found.");
+        else
+            todos.forEach(System.out::println);
     }
 
     private void filterTodos() {
@@ -147,9 +177,9 @@ public class TodoController {
         System.out.print("Value: ");
         String value = sc.nextLine();
 
-        List<Todo> result = filter.equalsIgnoreCase("status") ?
-                todoService.filterByStatus(userService.getLoggedInUser().getUserId(), value) :
-                todoService.filterByPriority(userService.getLoggedInUser().getUserId(), value);
+        List<Todo> result = filter.equalsIgnoreCase("status")
+                ? todoService.filterByStatus(userService.getLoggedInUser().getUserId(), value)
+                : todoService.filterByPriority(userService.getLoggedInUser().getUserId(), value);
 
         result.forEach(System.out::println);
     }

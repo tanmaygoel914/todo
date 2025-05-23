@@ -4,7 +4,7 @@ import dao.TodoDAO;
 import dto.TodoDTO;
 import entity.Todo;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,13 +15,29 @@ public class TodoService {
         Todo todo = new Todo( userId,
                 dto.getTitle(), dto.getDescription(),
                 "PENDING", dto.getPriority(),
-                dto.getDueDate(), LocalDate.now());
+                dto.getDueDate(), LocalDateTime.now());
 
         dao.addTodo(userId, todo);
     }
 
-    public List<Todo> getTodos(int userId) {
-        return dao.getTodosByUser(userId);
+    public List<Todo> getTodos(int userId, String searchKeyword, String statusFilter, String priorityFilter, String sortBy) {
+        return dao.getTodosByUser(userId).stream()
+            .filter(todo -> (searchKeyword == null ||
+                    todo.getTitle().toLowerCase().contains(searchKeyword.toLowerCase()) ||
+                    todo.getDescription().toLowerCase().contains(searchKeyword.toLowerCase())))
+            .filter(todo -> (statusFilter == null || todo.getStatus().equalsIgnoreCase(statusFilter)))
+            .filter(todo -> (priorityFilter == null || todo.getPriority().equalsIgnoreCase(priorityFilter)))
+            .sorted((t1, t2) -> {
+                switch (sortBy) {
+                    case "priority":
+                        return t1.getPriority().compareToIgnoreCase(t2.getPriority());
+                    case "dueDate":
+                        return t1.getDueDate().compareTo(t2.getDueDate());
+                    default:
+                        return t1.getCreationDate().compareTo(t2.getCreationDate());
+                }
+            })
+            .collect(Collectors.toList());
     }
 
     public void markAsComplete(int userId, int todoId) {
@@ -74,7 +90,9 @@ public class TodoService {
 
     public List<Todo> getOverdueTodos(int userId) {
         return dao.getTodosByUser(userId).stream()
-                .filter(todo -> todo.getDueDate().isBefore(LocalDate.now()) && !todo.getStatus().equals("COMPLETED"))
+                .filter(todo -> todo.getDueDate().isBefore(LocalDateTime.now()) && !todo.getStatus().equals("COMPLETED"))
                 .collect(Collectors.toList());
     }
+    
+    
 }
