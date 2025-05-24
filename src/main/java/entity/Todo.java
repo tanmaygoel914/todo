@@ -1,6 +1,6 @@
 package entity;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Todo {
     private static int todoCounter = 0;
@@ -10,11 +10,11 @@ public class Todo {
     private String description;
     private String status; // PENDING, IN_PROGRESS, COMPLETED
     private String priority; // HIGH, MEDIUM, LOW
-    private LocalDate dueDate;
-    private LocalDate creationDate;
+    private LocalDateTime dueDateTime;
+    private LocalDateTime creationDateTime;
 
     public Todo( int userId, String title, String description,
-                String status, String priority, LocalDate dueDate, LocalDate creationDate) {
+                String status, String priority, LocalDateTime dueDate, LocalDateTime creationDate) {
         setTodoId(todoCounter++);
         setUserId(userId);
         setTitle(title);
@@ -62,17 +62,17 @@ public class Todo {
     public void setPriority(String priority) {
         this.priority = priority;
     }
-    public LocalDate getDueDate() {
-        return dueDate;
+    public LocalDateTime getDueDate() {
+        return dueDateTime;
     }
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
+    public void setDueDate(LocalDateTime dueDateTime) {
+        this.dueDateTime = dueDateTime;
     }
-    public LocalDate getCreationDate() {
-        return creationDate;
+    public LocalDateTime getCreationDate() {
+        return creationDateTime;
     }
-    public void setCreationDate(LocalDate creationDate) {
-        this.creationDate = creationDate;
+    public void setCreationDate(LocalDateTime creationDateTime) {
+        this.creationDateTime = creationDateTime;
     }
     @Override
     public String toString() {
@@ -83,8 +83,8 @@ public class Todo {
                 ", description='" + description + '\'' +
                 ", status='" + status + '\'' +
                 ", priority='" + priority + '\'' +
-                ", dueDate=" + dueDate +
-                ", creationDate=" + creationDate +
+                ", dueDateTime=" + dueDateTime +
+                ", creationDateTime=" + creationDateTime +
                 '}';
     }
 }

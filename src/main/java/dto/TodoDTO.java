@@ -1,14 +1,14 @@
 package dto;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class TodoDTO {
     private String title;
     private String description;
     private String priority;
-    private LocalDate dueDate;
+    private LocalDateTime dueDate;
 
-    public TodoDTO(String title, String description, String priority, LocalDate dueDate) {
+    public TodoDTO(String title, String description, String priority, LocalDateTime dueDate) {
         this.title = title;
         this.description = description;
         this.priority = priority;
@@ -25,8 +25,8 @@ public class TodoDTO {
     public String getPriority() {
         return priority;
     }
-    public LocalDate getDueDate() {
+    public LocalDateTime getDueDate() {
         return dueDate;
     }
-    
+
 }
