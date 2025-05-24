@@ -45,12 +45,38 @@ public class TodoController {
     }
 
     private void signup() {
-        System.out.print("Name: ");
-        String name = sc.nextLine();
-        System.out.print("Email: ");
-        String email = sc.nextLine();
-        System.out.print("Password: ");
-        String password = sc.nextLine();
+        String name;
+        while (true) {
+            System.out.print("Name: ");
+            name = sc.nextLine();
+            if (InputValidator.validName(name)) {
+                break;
+            } else {
+                System.out.println("Invalid name format. Please try again.");
+            }
+        }
+
+        String email;
+        while (true) {
+            System.out.print("Email: ");
+            email = sc.nextLine();
+            if (InputValidator.validateEmail(email)) {
+                break;
+            } else {
+                System.out.println("Invalid email format. Please try again.");
+            }
+        }
+
+        String password;
+        while (true) {
+            System.out.print("Password: ");
+            password = sc.nextLine();
+            if (InputValidator.validatePassword(password)) {
+                break;
+            } else {
+                System.out.println("Invalid password format. Please try again.");
+            }
+        }
 
         if (userService.signup(name, email, password)) {
             System.out.println("Signup successful!");
@@ -84,8 +110,19 @@ public class TodoController {
         System.out.println("8. Remove TODO");
         System.out.println("9. Logout");
 
-        int choice = sc.nextInt();
-        sc.nextLine();
+        int choice;
+        while (true) {
+            try {
+                System.out.print("Choose an option: ");
+                choice = sc.nextInt();
+                sc.nextLine(); // consume newline
+             break;
+            } catch (Exception e) {
+                System.out.println("Invalid input. Please enter a number between 1 and 9.");
+                sc.nextLine(); // clear the invalid input
+            }
+           
+        }
 
         switch (choice) {
             case 1:
@@ -121,33 +158,54 @@ public class TodoController {
     }
 
     private void addTodo() {
-        System.out.print("Title: ");
-        String title = sc.nextLine();
-        System.out.print("Description: ");
-        String desc = sc.nextLine();
-        System.out.print("Priority (HIGH/MEDIUM/LOW): ");
-        String priority = sc.nextLine();
-        System.out.print("Due Date and Time (YYYY-MM-DD HH:mm): ");
-        String dueDateStr = sc.nextLine();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        LocalDateTime dueDate = LocalDateTime.parse(dueDateStr, formatter);
-        if (!InputValidator.validateDateTime(dueDateStr)) {
-            System.out.println("Invalid date format.");
-            return;
-        }
-        if (!InputValidator.isValidTitle(title)) {
-            System.out.println("Invalid title format.");
-            return;
-
-        }
-        if (!InputValidator.validateDescription(desc)) {
-            System.out.println("Invalid description format.");
-            return;
+        String title;
+        while (true) {
+            System.out.print("Title: ");
+            title = sc.nextLine();
+            if (InputValidator.isValidTitle(title)) {
+            break;
+            } else {
+            System.out.println("Invalid title format. Please try again.");
+            }
         }
 
-        if (!InputValidator.isDueDateAfterCreation(LocalDateTime.now(), dueDate)) {
-            System.out.println("Due date/time cannot be before creation date/time.");
-            return;
+        String desc;
+        while (true) {
+            System.out.print("Description: ");
+            desc = sc.nextLine();
+            if (InputValidator.validateDescription(desc)) {
+            break;
+            } else {
+            System.out.println("Invalid description format. Please try again.");
+            }
+        }
+
+        String priority;
+        while (true) {
+            System.out.print("Priority (HIGH/MEDIUM/LOW): ");
+            priority = sc.nextLine();
+            if (priority.equalsIgnoreCase("HIGH") || priority.equalsIgnoreCase("MEDIUM") || priority.equalsIgnoreCase("LOW")) {
+            break;
+            } else {
+            System.out.println("Invalid priority. Please enter HIGH, MEDIUM, or LOW.");
+            }
+        }
+
+        LocalDateTime dueDate;
+        while (true) {
+            System.out.print("Due Date and Time (YYYY-MM-DD HH:mm): ");
+            String dueDateStr = sc.nextLine();
+            if (!InputValidator.validateDateTime(dueDateStr)) {
+            System.out.println("Invalid date format. Please try again.");
+            continue;
+            }
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            dueDate = LocalDateTime.parse(dueDateStr, formatter);
+            if (!InputValidator.isDueDateAfterCreation(LocalDateTime.now(), dueDate)) {
+            System.out.println("Due date/time cannot be before creation date/time. Please try again.");
+            continue;
+            }
+            break;
         }
 
         TodoDTO dto = new TodoDTO(title, desc, priority, dueDate);
@@ -156,48 +214,109 @@ public class TodoController {
     }
 
    private void viewTodos() {
-        System.out.println("Enter search keyword (optional):");
-        String keyword = sc.nextLine().trim();
-        if (keyword.isEmpty()) keyword = null; // Convert empty string to null
+        String keyword = null;
+        String status = null;
+        String priority = null;
+        String sortBy = null;
+        while (true) {
+            try {
+            System.out.println("Enter search keyword (optional):");
+            keyword = sc.nextLine().trim();
+            if (keyword.isEmpty()) keyword = null;
 
-        System.out.println("Filter by status (Pending/Completed/In_Progress) or leave blank:");
-        String status = sc.nextLine().trim();
-        if (status.isEmpty()) status = null; // Convert empty string to null
+            // Status validation loop
+            while (true) {
+                System.out.println("Filter by status (Pending/Completed/In_Progress) or leave blank:");
+                status = sc.nextLine().trim();
+                if (status.isEmpty()) {
+                status = null;
+                break;
+                }
+                if (status.equalsIgnoreCase("Pending") ||
+                status.equalsIgnoreCase("Completed") ||
+                status.equalsIgnoreCase("In_Progress")) {
+                break;
+                } else {
+                System.out.println("Invalid status. Please enter Pending, Completed, or In_Progress.");
+                }
+            }
 
-        System.out.println("Filter by priority (High/Medium/Low) or leave blank:");
-        String priority = sc.nextLine().trim();
-        if (priority.isEmpty()) priority = null; // Convert empty string to null
+            // Priority validation loop
+            while (true) {
+                System.out.println("Filter by priority (High/Medium/Low) or leave blank:");
+                priority = sc.nextLine().trim();
+                if (priority.isEmpty()) {
+                priority = null;
+                break;
+                }
+                if (priority.equalsIgnoreCase("HIGH") ||
+                priority.equalsIgnoreCase("MEDIUM") ||
+                priority.equalsIgnoreCase("LOW")) {
+                break;
+                } else {
+                System.out.println("Invalid priority. Please enter High, Medium, or Low.");
+                }
+            }
 
-        System.out.println("Sort by (creationDate/dueDate/priority) or leave blank:");
-        String sortBy = sc.nextLine().trim();
-        if (sortBy.isEmpty()) sortBy = null; // Convert empty string to null
+            // SortBy validation loop
+            while (true) {
+                System.out.println("Sort by (creationDate/dueDate/priority) or leave blank:");
+                sortBy = sc.nextLine().trim();
+                if (sortBy.isEmpty()) {
+                sortBy = null;
+                break;
+                }
+                if (sortBy.equalsIgnoreCase("creationDate") ||
+                sortBy.equalsIgnoreCase("dueDate") ||
+                sortBy.equalsIgnoreCase("priority")) {
+                break;
+                } else {
+                System.out.println("Invalid sort option. Please enter creationDate, dueDate, or priority.");
+                }
+            }
 
-        List<Todo> todos = todoService.getTodos(userService.getLoggedInUser().getUserId(), 
-                                              keyword, status, priority, sortBy);
+            break;
+            } catch (Exception e) {
+            System.out.println("Invalid input. Please try again.");
+            sc.nextLine(); // clear the invalid input
+            }
+        }
+
+        List<Todo> todos = todoService.getTodos(userService.getLoggedInUser().getUserId(),
+                      keyword, status, priority, sortBy);
         if (todos.isEmpty()) {
             System.out.println("No TODOs found.");
         } else {
             System.out.println("Found " + todos.size() + " TODO(s):");
-            System.out.printf("%-6s %-20s %-25s %-10s %-12s %-20s %-20s%n", 
-                "ID", "Title", "Description", "Status", "Priority", "Due Date", "Created At");
+            System.out.printf("%-6s %-20s %-25s %-10s %-12s %-20s %-20s%n",
+            "ID", "Title", "Description", "Status", "Priority", "Due Date", "Created At");
             System.out.println("-----------------------------------------------------------------------------------------------------------------------------");
             for (Todo todo : todos) {
-                System.out.printf("%-6s %-20s %-25s %-10s %-12s %-20s %-20s%n",
-                    todo.getTodoId(),
-                    todo.getTitle(),
-                    todo.getDescription(),
-                    todo.getStatus(),
-                    todo.getPriority(),
-                    todo.getDueDate(),
-                    todo.getCreationDate()
-                );
+            System.out.printf("%-6s %-20s %-25s %-10s %-12s %-20s %-20s%n",
+                todo.getTodoId(),
+                todo.getTitle(),
+                todo.getDescription(),
+                todo.getStatus(),
+                todo.getPriority(),
+                todo.getDueDate(),
+                todo.getCreationDate()
+            );
             }
         }
     }
     private void editTodo() {
         System.out.print("Enter TODO ID to edit: ");
-        int id = sc.nextInt();
-        sc.nextLine(); // consume newline
+        int id;
+        while (true) {
+            try {
+                id = sc.nextInt();
+                sc.nextLine(); // consume newline
+                break;
+            } catch (Exception e) {
+                System.out.println("Invalid input. Please enter a valid TODO ID (number):");
+                sc.nextLine(); // clear invalid input
+            }
+        }
         
         Todo existingTodo = todoService.getTodoById(userService.getLoggedInUser().getUserId(), id);
         if (existingTodo == null) {

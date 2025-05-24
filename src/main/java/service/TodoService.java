@@ -84,8 +84,10 @@ public class TodoService {
         dao.getTodosByUser(userId).forEach(todo -> {
             if (todo.getTodoId() == todoId) {
                 todo.setStatus("COMPLETED");
+                return;
             }
         });
+        System.out.println("todo did not found");
     }
 
     public void markAsInProgress(int userId, int todoId) {
