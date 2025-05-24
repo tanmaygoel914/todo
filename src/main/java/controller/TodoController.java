@@ -22,16 +22,15 @@ public class TodoController {
         while (true) {
             if (userService.getLoggedInUser() == null) {
                 System.out.println("1. Signup\n2. Login\n3. Exit");
-                int choice = sc.nextInt();
-                sc.nextLine();
+                String choice = sc.nextLine();
                 switch (choice) {
-                    case 1:
+                    case "1":
                         signup();
                         break;
-                    case 2:
+                    case "2":
                         login();
                         break;
-                    case 3:
+                    case "3":
                         System.exit(0);
                         break;
                     default:
@@ -103,12 +102,12 @@ public class TodoController {
         System.out.println("1. Add TODO");
         System.out.println("2. View All TODOs");
         System.out.println("3. Edit TODO");
-        System.out.println("4. Search TODOs");
-        System.out.println("5. Mark TODO Complete");
-        System.out.println("6. Mark TODO In Progress");
-        System.out.println("7. View Overdue TODOs");
-        System.out.println("8. Remove TODO");
-        System.out.println("9. Logout");
+  
+        System.out.println("4. Mark TODO Complete");
+        System.out.println("5. Mark TODO In Progress");
+        System.out.println("6. View Overdue TODOs");
+        System.out.println("7. Remove TODO");
+        System.out.println("8. Logout");
 
         int choice;
         while (true) {
@@ -135,21 +134,18 @@ public class TodoController {
                 editTodo();
                 break;
             case 4:
-                searchTodos();
-                break;
-            case 5:
                 markComplete();
                 break;
-            case 6:
+            case 5:
                 markInProgress();
                 break;
-            case 7:
+            case 6:
                 viewOverdue();
                 break;
-            case 8:
+            case 7:
                 removeTodo();
                 break;
-            case 9:
+            case 8:
                 userService.logout();
                 break;
             default:
@@ -339,26 +335,39 @@ public class TodoController {
             desc = existingTodo.getDescription();
         }
         
-        System.out.print("Priority [" + existingTodo.getPriority() + "] (HIGH/MEDIUM/LOW): ");
-        String priority = sc.nextLine();
-        if (priority.trim().isEmpty()) {
+        // Priority input with validation loop
+        String priority;
+        while (true) {
+            System.out.print("Priority [" + existingTodo.getPriority() + "] (HIGH/MEDIUM/LOW): ");
+            priority = sc.nextLine();
+            if (priority.trim().isEmpty()) {
             priority = existingTodo.getPriority();
+            break;
+            }
+            if (priority.equalsIgnoreCase("HIGH") || priority.equalsIgnoreCase("MEDIUM") || priority.equalsIgnoreCase("LOW")) {
+            break;
+            } else {
+            System.out.println("Invalid priority. Please enter HIGH, MEDIUM, or LOW.");
+            }
         }
-        
-        System.out.print("Due Date and Time [" + existingTodo.getDueDate() + "] (YYYY-MM-DD HH:mm): ");
-        String dueDateStr = sc.nextLine();
+
+        // Due date input with validation loop
         LocalDateTime dueDate;
-        if (dueDateStr.trim().isEmpty()) {
+        while (true) {
+            System.out.print("Due Date and Time [" + existingTodo.getDueDate() + "] (YYYY-MM-DD HH:mm): ");
+            String dueDateStr = sc.nextLine();
+            if (dueDateStr.trim().isEmpty()) {
             dueDate = existingTodo.getDueDate();
-        } else {
+            break;
+            }
             if (!InputValidator.validateDateTime(dueDateStr)) {
-                System.out.println("Invalid date format.");
-                return;
+            System.out.println("Invalid date format. Please try again.");
+            continue;
             }
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             dueDate = LocalDateTime.parse(dueDateStr, formatter);
+            break;
         }
-        
         // Validate inputs
         if (!InputValidator.isValidTitle(title)) {
             System.out.println("Invalid title format.");
@@ -377,12 +386,7 @@ public class TodoController {
         }
     }
 
-    private void searchTodos() {
-        System.out.print("Enter keyword: ");
-        String keyword = sc.nextLine();
-        todoService.search(userService.getLoggedInUser().getUserId(), keyword)
-                .forEach(System.out::println);
-    }
+ 
 
     private void markComplete() {
         System.out.print("Enter TODO ID to mark as complete: ");
