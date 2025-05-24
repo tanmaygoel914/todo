@@ -1,20 +1,21 @@
 package service;
 
 import dao.UserDAO;
+import dao.impl.UserDAOImpl;
 import entity.User;
 import utility.InputValidator;
 
 import java.util.Optional;
 
 public class UserService {
-    private final UserDAO dao = new UserDAO();
+    private final UserDAO dao = new UserDAOImpl();
     private User loggedInUser;
 
     public boolean signup(String name, String email, String password) {
-        if (!InputValidator.validateEmail(email) || !InputValidator.validatePassword(password)|| !InputValidator.validName(name)) return false;
+        if (!InputValidator.validateEmail(email) || !InputValidator.validatePassword(password) || !InputValidator.validName(name)) return false;
         if (dao.findByEmail(email).isPresent()) return false;
 
-        User user = new User( name, email, password);
+        User user = new User(name, email, password);
         dao.save(user);
         return true;
     }

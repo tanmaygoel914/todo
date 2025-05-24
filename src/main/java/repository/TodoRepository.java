@@ -15,6 +15,25 @@ public class TodoRepository {
     }
 
     public void delete(int userId, int todoId) {
-        todoMap.getOrDefault(userId, new ArrayList<>()).removeIf(todo -> todo.getTodoId()==todoId);
+        todoMap.getOrDefault(userId, new ArrayList<>()).removeIf(todo -> todo.getTodoId() == todoId);
+    }
+
+    public Todo getById(int userId, int todoId) {
+        return todoMap.getOrDefault(userId, new ArrayList<>())
+                .stream()
+                .filter(todo -> todo.getTodoId() == todoId)
+                .findFirst()
+                .orElse(null);
+    }
+
+    public boolean update(int userId, int todoId, Todo updatedTodo) {
+        List<Todo> userTodos = todoMap.getOrDefault(userId, new ArrayList<>());
+        for (int i = 0; i < userTodos.size(); i++) {
+            if (userTodos.get(i).getTodoId() == todoId) {
+                userTodos.set(i, updatedTodo);
+                return true;
+            }
+        }
+        return false;
     }
 }
