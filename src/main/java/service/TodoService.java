@@ -20,25 +20,31 @@ public class TodoService {
         dao.addTodo(userId, todo);
     }
 
-    public List<Todo> getTodos(int userId, String searchKeyword, String statusFilter, String priorityFilter, String sortBy) {
-        return dao.getTodosByUser(userId).stream()
-            .filter(todo -> (searchKeyword == null ||
-                    todo.getTitle().toLowerCase().contains(searchKeyword.toLowerCase()) ||
-                    todo.getDescription().toLowerCase().contains(searchKeyword.toLowerCase())))
-            .filter(todo -> (statusFilter == null || todo.getStatus().equalsIgnoreCase(statusFilter)))
-            .filter(todo -> (priorityFilter == null || todo.getPriority().equalsIgnoreCase(priorityFilter)))
-            .sorted((t1, t2) -> {
-                switch (sortBy) {
-                    case "priority":
-                        return t1.getPriority().compareToIgnoreCase(t2.getPriority());
-                    case "dueDate":
-                        return t1.getDueDate().compareTo(t2.getDueDate());
-                    default:
-                        return t1.getCreationDate().compareTo(t2.getCreationDate());
-                }
-            })
-            .collect(Collectors.toList());
-    }
+  
+public List<Todo> getTodos(int userId, String searchKeyword, String statusFilter, String priorityFilter, String sortBy) {
+    return dao.getTodosByUser(userId).stream()
+        .filter(todo -> (searchKeyword == null || searchKeyword.trim().isEmpty() ||
+                todo.getTitle().toLowerCase().contains(searchKeyword.toLowerCase()) ||
+                todo.getDescription().toLowerCase().contains(searchKeyword.toLowerCase())))
+        .filter(todo -> (statusFilter == null || statusFilter.trim().isEmpty() || 
+                todo.getStatus().equalsIgnoreCase(statusFilter)))
+        .filter(todo -> (priorityFilter == null || priorityFilter.trim().isEmpty() || 
+                todo.getPriority().equalsIgnoreCase(priorityFilter)))
+        .sorted((t1, t2) -> {
+            if (sortBy == null || sortBy.trim().isEmpty()) {
+                return t1.getCreationDate().compareTo(t2.getCreationDate());
+            }
+            switch (sortBy.toLowerCase()) {
+                case "priority":
+                    return t1.getPriority().compareToIgnoreCase(t2.getPriority());
+                case "duedate":
+                    return t1.getDueDate().compareTo(t2.getDueDate());
+                default:
+                    return t1.getCreationDate().compareTo(t2.getCreationDate());
+            }
+        })
+        .collect(Collectors.toList());
+}
 
     public void markAsComplete(int userId, int todoId) {
         dao.getTodosByUser(userId).forEach(todo -> {

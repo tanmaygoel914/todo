@@ -151,26 +151,32 @@ public class TodoController {
         System.out.println("TODO added!");
     }
 
-    private void viewTodos() {
-        System.out.println("Enter search keyword (optional):");
-        String keyword = sc.nextLine();
+  private void viewTodos() {
+    System.out.println("Enter search keyword (optional):");
+    String keyword = sc.nextLine().trim();
+    if (keyword.isEmpty()) keyword = null; // Convert empty string to null
 
-        System.out.println("Filter by status (Pending/Completed) or leave blank:");
-        String status = sc.nextLine();
+    System.out.println("Filter by status (Pending/Completed) or leave blank:");
+    String status = sc.nextLine().trim();
+    if (status.isEmpty()) status = null; // Convert empty string to null
 
-        System.out.println("Filter by priority (High/Medium/Low) or leave blank:");
-        String priority = sc.nextLine();
+    System.out.println("Filter by priority (High/Medium/Low) or leave blank:");
+    String priority = sc.nextLine().trim();
+    if (priority.isEmpty()) priority = null; // Convert empty string to null
 
-        System.out.println("Sort by (creationDate/dueDate/priority):");
-        String sortBy = sc.nextLine();
-        List<Todo> todos = todoService.getTodos(userService.getLoggedInUser().getUserId(), keyword, status, priority,
-                sortBy);
-        if (todos.isEmpty())
-            System.out.println("No TODOs found.");
-        else
-            todos.forEach(System.out::println);
+    System.out.println("Sort by (creationDate/dueDate/priority):");
+    String sortBy = sc.nextLine().trim();
+    if (sortBy.isEmpty()) sortBy = null; // Convert empty string to null
+
+    List<Todo> todos = todoService.getTodos(userService.getLoggedInUser().getUserId(), 
+                                          keyword, status, priority, sortBy);
+    if (todos.isEmpty()) {
+        System.out.println("No TODOs found.");
+    } else {
+        System.out.println("Found " + todos.size() + " TODO(s):");
+        todos.forEach(System.out::println);
     }
-
+}
     private void filterTodos() {
         System.out.print("Filter by (status/priority): ");
         String filter = sc.nextLine();
